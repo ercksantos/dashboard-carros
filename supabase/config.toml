@@ -1,0 +1,4 @@
+project_id = "tmxhonthzjnfnwxlfqsn"
+
+[functions.sync-agent]
+verify_jwt = true
