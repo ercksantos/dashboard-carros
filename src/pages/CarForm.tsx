@@ -7,9 +7,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Save } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
+import { ImageUpload } from "@/components/cars/ImageUpload";
 
 const carSchema = z.object({
   nome: z.string().trim().min(1, "Nome é obrigatório").max(100),
@@ -30,6 +32,8 @@ export default function CarForm() {
   const [ano, setAno] = useState("");
   const [preco, setPreco] = useState("");
   const [status, setStatus] = useState("disponível");
+  const [fotos, setFotos] = useState<string[]>([]);
+  const [fotosInternas, setFotosInternas] = useState<string[]>([]);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -60,6 +64,8 @@ export default function CarForm() {
       setAno(data.ano.toString());
       setPreco(data.preco.toString());
       setStatus(data.status);
+      setFotos(Array.isArray(data.fotos) ? (data.fotos as string[]) : []);
+      setFotosInternas(Array.isArray(data.fotos_internas) ? (data.fotos_internas as string[]) : []);
     } catch (error) {
       toast.error("Erro ao carregar carro");
       navigate("/carros");
@@ -75,6 +81,8 @@ export default function CarForm() {
       ano: parseInt(ano),
       preco: parseFloat(preco),
       status,
+      fotos,
+      fotos_internas: fotosInternas,
     };
 
     try {
@@ -235,6 +243,31 @@ export default function CarForm() {
                 </SelectContent>
               </Select>
             </div>
+
+            <Tabs defaultValue="externas" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="externas">Fotos Externas</TabsTrigger>
+                <TabsTrigger value="internas">Fotos Internas</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="externas" className="mt-4">
+                <ImageUpload
+                  label="Fotos Externas do Veículo"
+                  images={fotos}
+                  onImagesChange={setFotos}
+                  maxImages={10}
+                />
+              </TabsContent>
+              
+              <TabsContent value="internas" className="mt-4">
+                <ImageUpload
+                  label="Fotos Internas do Veículo"
+                  images={fotosInternas}
+                  onImagesChange={setFotosInternas}
+                  maxImages={10}
+                />
+              </TabsContent>
+            </Tabs>
 
             <div className="flex gap-4 pt-4">
               <Button
