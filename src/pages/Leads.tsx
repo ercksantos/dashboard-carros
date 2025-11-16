@@ -9,6 +9,7 @@ interface Lead {
   id: number;
   nome: string | null;
   carro_interesse: string | null;
+  telefone: string | null;
   created_at: string;
 }
 
@@ -20,6 +21,7 @@ export default function LeadsPage() {
   // 🔍 Estados dos filtros
   const [searchName, setSearchName] = useState("");
   const [searchCar, setSearchCar] = useState("");
+  const [searchPhone, setSearchPhone] = useState("");
 
   useEffect(() => {
     fetchLeads();
@@ -28,7 +30,7 @@ export default function LeadsPage() {
   const fetchLeads = async () => {
     let query = supabase
       .from("leads")
-      .select("id, nome, carro_interesse, created_at")
+      .select("id, nome, carro_interesse, telefone, created_at")
       .order("created_at", { ascending: false });
 
     const { data, error } = await query;
@@ -50,7 +52,11 @@ export default function LeadsPage() {
       ?.toLowerCase()
       .includes(searchCar.toLowerCase());
 
-    return nameMatch && carMatch;
+    const phoneMatch = lead.telefone
+      ?.toLowerCase()
+      .includes(searchPhone.toLowerCase());
+
+    return nameMatch && carMatch && phoneMatch;
   });
 
   if (loading) {
@@ -82,7 +88,7 @@ export default function LeadsPage() {
         <CardContent>
 
           {/* 🔍 Área de Filtros */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <Input
               placeholder="Filtrar por nome..."
               value={searchName}
@@ -93,6 +99,12 @@ export default function LeadsPage() {
               placeholder="Filtrar por carro de interesse..."
               value={searchCar}
               onChange={(e) => setSearchCar(e.target.value)}
+            />
+
+            <Input
+              placeholder="Filtrar por telefone..."
+              value={searchPhone}
+              onChange={(e) => setSearchPhone(e.target.value)}
             />
           </div>
 
@@ -111,6 +123,9 @@ export default function LeadsPage() {
                   <p className="text-sm text-muted-foreground">
                     Interesse: {lead.carro_interesse || "Nenhum"}
                   </p>
+                  <p className="text-sm text-muted-foreground">
+                    Telefone: {lead.telefone || "-"}
+                  </p>
                   <p className="text-xs text-muted-foreground mt-1">
                     Criado em: {new Date(lead.created_at).toLocaleString()}
                   </p>
@@ -122,6 +137,7 @@ export default function LeadsPage() {
               </div>
             ))}
           </div>
+
         </CardContent>
       </Card>
     </div>
