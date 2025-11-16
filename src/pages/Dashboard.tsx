@@ -1,3 +1,5 @@
+import { useLeadMetrics } from "@/hooks/useLeadsMetrics";
+import { UserCheck, Clock, CheckCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -80,8 +82,13 @@ export default function Dashboard() {
         .limit(5);
 
       if (topCarsData) {
-        setChartData(topCarsData);
+        const parsed = topCarsData.map((c) => ({
+          nome: c.nome,
+          visitas: Number(c.visitas) || 0,
+        }));
+        setChartData(parsed);
       }
+
     } catch (error) {
       toast.error("Erro ao carregar dados do dashboard");
     } finally {
@@ -110,14 +117,27 @@ export default function Dashboard() {
             <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
             <p className="text-muted-foreground mt-1">Visão geral do estoque e atendimentos</p>
           </div>
-          <Button 
-            onClick={() => navigate("/carros")} 
-            className="gradient-primary glow-primary"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Gerenciar Carros
-          </Button>
+
+          <div className="flex items-center gap-3">
+            <Button 
+              onClick={() => navigate("/carros")} 
+              className="gradient-primary glow-primary"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Gerenciar Carros
+            </Button>
+
+            <Button 
+              onClick={() => navigate("/leads")} 
+              variant="secondary" 
+              className="border border-primary/30"
+            >
+              <UserCheck className="w-4 h-4 mr-2" />
+              Ver Leads
+            </Button>
+          </div>
         </div>
+
 
         {/* Metrics Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -160,11 +180,15 @@ export default function Dashboard() {
                 />
                 <Tooltip 
                   contentStyle={{ 
-                    backgroundColor: 'hsl(var(--card))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px'
+                    background: 'rgba(30, 41, 59, 0.9)',
+                    backdropFilter: 'blur(8px)',
+                    border: '1px solid rgba(148, 163, 184, 0.2)',
+                    borderRadius: 'px',
+                    padding: '8px 12px',
+                    color: '#fff',
                   }}
                 />
+
                 <Bar dataKey="visitas" radius={[8, 8, 0, 0]}>
                   {chartData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />

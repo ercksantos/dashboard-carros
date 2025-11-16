@@ -5,6 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
+import Leads from "./pages/Leads";
+import LeadDetailsPage from "@/pages/LeadDetails";
 import Cars from "./pages/Cars";
 import CarForm from "./pages/CarForm";
 import NotFound from "./pages/NotFound";
@@ -21,6 +23,8 @@ const App = () => (
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/leads" element={<Leads />} />
+          <Route path="/leads/:id" element={<LeadDetailsPage />} />
           <Route path="/carros" element={<Cars />} />
           <Route path="/carros/novo" element={<CarForm />} />
           <Route path="/carros/editar/:id" element={<CarForm />} />
@@ -32,4 +36,4 @@ const App = () => (
   </QueryClientProvider>
 );
 
-export default App;
+export default App; 
