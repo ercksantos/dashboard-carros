@@ -52,12 +52,13 @@ export default function Dashboard() {
       setTotalCars(availableCount || 0);
 
       // Total de atendimentos dos últimos 30 dias
-      const { data: carsData } = await supabase
-        .from("carros")
-        .select("atendimentos");
+      const { count: atendimentosCount } = await supabase
+        .from("leads")
+        .select("*", { count: "exact", head: true })
+        .gte("created_at", new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
 
-      const totalAtend = carsData?.reduce((sum, car) => sum + (car.atendimentos || 0), 0) || 0;
-      setTotalAtendimentos(totalAtend);
+      setTotalAtendimentos(atendimentosCount || 0);
+
 
       // Carro mais procurado
       const { data: topCarData } = await supabase
