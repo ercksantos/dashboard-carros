@@ -11,6 +11,7 @@ interface Lead {
   carro_interesse: string | null;
   telefone: string | null;
   created_at: string;
+  status_financiamento: "pendente" | "aprovado" | "reprovado" | null;
 }
 
 export default function LeadsPage() {
@@ -18,7 +19,7 @@ export default function LeadsPage() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // 🔍 Estados dos filtros
+  // filtros
   const [searchName, setSearchName] = useState("");
   const [searchCar, setSearchCar] = useState("");
   const [searchPhone, setSearchPhone] = useState("");
@@ -28,12 +29,10 @@ export default function LeadsPage() {
   }, []);
 
   const fetchLeads = async () => {
-    let query = supabase
+    const { data, error } = await supabase
       .from("leads")
-      .select("id, nome, carro_interesse, telefone, created_at")
+      .select("id, nome, carro_interesse, telefone, created_at, status_financiamento")
       .order("created_at", { ascending: false });
-
-    const { data, error } = await query;
 
     if (!error && data) {
       setLeads(data);
@@ -42,22 +41,31 @@ export default function LeadsPage() {
     setLoading(false);
   };
 
-  // 🔎 Filtro local
+  const updateStatus = async (id: number, status: string) => {
+    await supabase
+      .from("leads")
+      .update({ status_financiamento: status })
+      .eq("id", id);
+
+    fetchLeads(); // atualiza instantâneo
+  };
+
   const filteredLeads = leads.filter((lead) => {
-    const nameMatch = lead.nome
-      ?.toLowerCase()
-      .includes(searchName.toLowerCase());
-
-    const carMatch = lead.carro_interesse
-      ?.toLowerCase()
-      .includes(searchCar.toLowerCase());
-
-    const phoneMatch = lead.telefone
-      ?.toLowerCase()
-      .includes(searchPhone.toLowerCase());
-
+    const nameMatch = lead.nome?.toLowerCase().includes(searchName.toLowerCase());
+    const carMatch = lead.carro_interesse?.toLowerCase().includes(searchCar.toLowerCase());
+    const phoneMatch = lead.telefone?.toLowerCase().includes(searchPhone.toLowerCase());
     return nameMatch && carMatch && phoneMatch;
   });
+
+  const renderStatusBadge = (status: string | null) => {
+    if (status === "aprovado")
+      return <span className="text-green-500 font-semibold">Aprovado</span>;
+
+    if (status === "reprovado")
+      return <span className="text-red-500 font-semibold">Reprovado</span>;
+
+    return <span className="text-zinc-400">Pendente</span>;
+  };
 
   if (loading) {
     return (
@@ -70,7 +78,6 @@ export default function LeadsPage() {
   return (
     <div className="min-h-screen bg-background px-6 py-10 max-w-5xl mx-auto space-y-8">
 
-      {/* 🔙 Botão Voltar */}
       <Button variant="outline" onClick={() => navigate("/dashboard")}>
         Voltar para o Dashboard
       </Button>
@@ -87,53 +94,53 @@ export default function LeadsPage() {
 
         <CardContent>
 
-          {/* 🔍 Área de Filtros */}
+          {/* filtros */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <Input
-              placeholder="Filtrar por nome..."
-              value={searchName}
-              onChange={(e) => setSearchName(e.target.value)}
-            />
-
-            <Input
-              placeholder="Filtrar por carro de interesse..."
-              value={searchCar}
-              onChange={(e) => setSearchCar(e.target.value)}
-            />
-
-            <Input
-              placeholder="Filtrar por telefone..."
-              value={searchPhone}
-              onChange={(e) => setSearchPhone(e.target.value)}
-            />
+            <Input placeholder="Filtrar por nome..." value={searchName} onChange={(e) => setSearchName(e.target.value)} />
+            <Input placeholder="Filtrar por carro..." value={searchCar} onChange={(e) => setSearchCar(e.target.value)} />
+            <Input placeholder="Filtrar por telefone..." value={searchPhone} onChange={(e) => setSearchPhone(e.target.value)} />
           </div>
 
           <div className="space-y-4">
-            {filteredLeads.length === 0 && (
-              <p className="text-muted-foreground">Nenhum lead encontrado.</p>
-            )}
+            {filteredLeads.length === 0 && <p className="text-muted-foreground">Nenhum lead encontrado.</p>}
 
             {filteredLeads.map((lead) => (
-              <div
-                key={lead.id}
-                className="flex items-center justify-between bg-muted p-4 rounded-lg"
-              >
+              <div key={lead.id} className="flex items-center justify-between bg-muted p-4 rounded-lg">
                 <div>
                   <p className="font-medium">{lead.nome || "Sem nome"}</p>
-                  <p className="text-sm text-muted-foreground">
-                    Interesse: {lead.carro_interesse || "Nenhum"}
+                  <p className="text-sm text-muted-foreground">Interesse: {lead.carro_interesse || "Nenhum"}</p>
+                  <p className="text-sm text-muted-foreground">Telefone: {lead.telefone || "-"}</p>
+
+                  <p className="mt-2 text-sm">
+                    Status: {renderStatusBadge(lead.status_financiamento)}
                   </p>
-                  <p className="text-sm text-muted-foreground">
-                    Telefone: {lead.telefone || "-"}
-                  </p>
+
                   <p className="text-xs text-muted-foreground mt-1">
                     Criado em: {new Date(lead.created_at).toLocaleString()}
                   </p>
                 </div>
 
-                <Button onClick={() => navigate(`/leads/${lead.id}`)}>
-                  Ver Detalhes
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => updateStatus(lead.id, "aprovado")}
+                    className="border border-emerald-500 text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 transition"
+                  >
+                    Aprovado
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    onClick={() => updateStatus(lead.id, "reprovado")}
+                    className="border border-red-500 text-red-400 bg-red-500/5 hover:bg-red-500/20 transition"
+                  >
+                    Reprovado
+                  </Button>
+
+                  <Button onClick={() => navigate(`/leads/${lead.id}`)}>
+                    Ver Detalhes
+                  </Button>
+                </div>
               </div>
             ))}
           </div>

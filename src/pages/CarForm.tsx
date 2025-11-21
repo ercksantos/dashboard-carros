@@ -16,6 +16,8 @@ import { ImageUpload } from "@/components/cars/ImageUpload";
 const carSchema = z.object({
   nome: z.string().trim().min(1, "Nome é obrigatório").max(100),
   marca: z.string().trim().min(1, "Marca é obrigatória").max(50),
+  tipo: z.string().trim().min(1, "Tipo é obrigatório"),
+  cambio: z.string().trim().min(1, "Câmbio é obrigatório"),
   ano: z.number().min(1900).max(new Date().getFullYear() + 1),
   preco: z.number().positive("Preço deve ser positivo"),
   status: z.enum(["disponível", "vendido", "revisão"]),
@@ -29,6 +31,8 @@ export default function CarForm() {
   const [loading, setLoading] = useState(false);
   const [nome, setNome] = useState("");
   const [marca, setMarca] = useState("");
+  const [tipo, setTipo] = useState("");
+  const [cambio, setCambio] = useState("");
   const [ano, setAno] = useState("");
   const [preco, setPreco] = useState("");
   const [status, setStatus] = useState("disponível");
@@ -61,8 +65,13 @@ export default function CarForm() {
 
       setNome(data.nome);
       setMarca(data.marca);
-      setAno(data.ano.toString());
-      setPreco(data.preco.toString());
+
+      // 🔥 Correção: carregar tipo e câmbio
+      setTipo(data.tipo || "");
+      setCambio(data.cambio || "");
+
+      setAno(data.ano?.toString() || "");
+      setPreco(data.preco?.toString() || "");
       setStatus(data.status);
       setFotos(Array.isArray(data.fotos) ? (data.fotos as string[]) : []);
       setFotosInternas(Array.isArray(data.fotos_internas) ? (data.fotos_internas as string[]) : []);
@@ -78,6 +87,8 @@ export default function CarForm() {
     const carData = {
       nome: nome.trim(),
       marca: marca.trim(),
+      tipo: tipo.trim(),
+      cambio: cambio.trim(),
       ano: parseInt(ano),
       preco: parseFloat(preco),
       status,
@@ -141,8 +152,6 @@ export default function CarForm() {
             console.error('Erro ao sincronizar com agente:', syncError);
           } else if (syncData?.success) {
             toast.success("Dados sincronizados com o agente");
-          } else {
-            console.log('Agente não configurado ou erro na sincronização');
           }
         } catch (syncErr) {
           console.error('Erro na sincronização:', syncErr);
@@ -177,6 +186,8 @@ export default function CarForm() {
           </h1>
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            
+            {/* Nome */}
             <div className="space-y-2">
               <Label htmlFor="nome">Nome do Carro</Label>
               <Input
@@ -189,6 +200,7 @@ export default function CarForm() {
               />
             </div>
 
+            {/* Marca */}
             <div className="space-y-2">
               <Label htmlFor="marca">Marca</Label>
               <Input
@@ -201,6 +213,42 @@ export default function CarForm() {
               />
             </div>
 
+            {/* Tipo */}
+            <div className="space-y-2">
+              <Label htmlFor="tipo">Tipo</Label>
+              <Select value={tipo} onValueChange={setTipo} disabled={loading}>
+                <SelectTrigger id="tipo">
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="hatch">Hatch</SelectItem>
+                  <SelectItem value="sedan">Sedan</SelectItem>
+                  <SelectItem value="suv">SUV</SelectItem>
+                  <SelectItem value="picape">Picape</SelectItem>
+                  <SelectItem value="eletrico">Elétrico</SelectItem>
+                  <SelectItem value="hibrido">Híbrido</SelectItem>
+                  <SelectItem value="minivan">Minivan</SelectItem>
+                  <SelectItem value="esportivo">Esportivo</SelectItem>
+                  <SelectItem value="moto">Moto</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Câmbio */}
+            <div className="space-y-2">
+              <Label htmlFor="cambio">Câmbio</Label>
+              <Select value={cambio} onValueChange={setCambio} disabled={loading}>
+                <SelectTrigger id="cambio">
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="manual">Manual</SelectItem>
+                  <SelectItem value="automatico">Automático</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Ano + Preço */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="ano">Ano</Label>
@@ -230,6 +278,7 @@ export default function CarForm() {
               </div>
             </div>
 
+            {/* Status */}
             <div className="space-y-2">
               <Label htmlFor="status">Status</Label>
               <Select value={status} onValueChange={setStatus} disabled={loading}>
@@ -244,6 +293,7 @@ export default function CarForm() {
               </Select>
             </div>
 
+            {/* Fotos */}
             <Tabs defaultValue="externas" className="w-full">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="externas">Fotos Externas</TabsTrigger>
@@ -269,6 +319,7 @@ export default function CarForm() {
               </TabsContent>
             </Tabs>
 
+            {/* Botões */}
             <div className="flex gap-4 pt-4">
               <Button
                 type="button"

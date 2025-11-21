@@ -25,6 +25,8 @@ interface Car {
   id: number;
   nome: string;
   marca: string;
+  tipo: string;
+  cambio: string;
   ano: number;
   preco: number;
   status: string;
@@ -46,15 +48,11 @@ export default function Cars() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) {
-        navigate("/auth");
-      }
+      if (!session) navigate("/auth");
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (!session) {
-        navigate("/auth");
-      }
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+      if (!session) navigate("/auth");
     });
 
     loadCars();
@@ -74,9 +72,9 @@ export default function Cars() {
         .order("atualizado_em", { ascending: false });
 
       if (error) throw error;
-      
+
       setCars(data || []);
-    } catch (error) {
+    } catch {
       toast.error("Erro ao carregar carros");
     } finally {
       setLoading(false);
@@ -87,18 +85,19 @@ export default function Cars() {
     let filtered = [...cars];
 
     if (searchTerm) {
-      filtered = filtered.filter(car => 
-        car.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        car.marca.toLowerCase().includes(searchTerm.toLowerCase())
+      filtered = filtered.filter(
+        (car) =>
+          car.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          car.marca.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
     if (filterMarca !== "all") {
-      filtered = filtered.filter(car => car.marca === filterMarca);
+      filtered = filtered.filter((car) => car.marca === filterMarca);
     }
 
     if (filterStatus !== "all") {
-      filtered = filtered.filter(car => car.status === filterStatus);
+      filtered = filtered.filter((car) => car.status === filterStatus);
     }
 
     setFilteredCars(filtered);
@@ -108,16 +107,13 @@ export default function Cars() {
     if (!carToDelete) return;
 
     try {
-      const { error } = await supabase
-        .from("carros")
-        .delete()
-        .eq("id", carToDelete);
+      const { error } = await supabase.from("carros").delete().eq("id", carToDelete);
 
       if (error) throw error;
 
       toast.success("Carro deletado com sucesso");
       loadCars();
-    } catch (error) {
+    } catch {
       toast.error("Erro ao deletar carro");
     } finally {
       setDeleteDialogOpen(false);
@@ -127,21 +123,18 @@ export default function Cars() {
 
   const handleMarkAsSold = async (id: number) => {
     try {
-      const { error } = await supabase
-        .from("carros")
-        .update({ status: "vendido" })
-        .eq("id", id);
+      const { error } = await supabase.from("carros").update({ status: "vendido" }).eq("id", id);
 
       if (error) throw error;
 
       toast.success("Carro marcado como vendido");
       loadCars();
-    } catch (error) {
+    } catch {
       toast.error("Erro ao atualizar status");
     }
   };
 
-  const uniqueMarcas = Array.from(new Set(cars.map(car => car.marca)));
+  const uniqueMarcas = Array.from(new Set(cars.map((car) => car.marca)));
 
   if (loading) {
     return (
@@ -154,17 +147,14 @@ export default function Cars() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      
+
       <main className="container mx-auto px-4 py-8 space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-foreground">Gestão de Carros</h1>
             <p className="text-muted-foreground mt-1">Gerencie todo o estoque da concessionária</p>
           </div>
-          <Button 
-            onClick={() => navigate("/carros/novo")} 
-            className="gradient-primary glow-primary"
-          >
+          <Button onClick={() => navigate("/carros/novo")} className="gradient-primary glow-primary">
             <Plus className="w-4 h-4 mr-2" />
             Adicionar Carro
           </Button>
@@ -181,17 +171,21 @@ export default function Cars() {
                 className="pl-10"
               />
             </div>
+
             <Select value={filterMarca} onValueChange={setFilterMarca}>
               <SelectTrigger className="w-full md:w-48">
                 <SelectValue placeholder="Filtrar por marca" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todas as marcas</SelectItem>
-                {uniqueMarcas.map(marca => (
-                  <SelectItem key={marca} value={marca}>{marca}</SelectItem>
+                {uniqueMarcas.map((marca) => (
+                  <SelectItem key={marca} value={marca}>
+                    {marca}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
+
             <Select value={filterStatus} onValueChange={setFilterStatus}>
               <SelectTrigger className="w-full md:w-48">
                 <SelectValue placeholder="Filtrar por status" />
@@ -211,6 +205,8 @@ export default function Cars() {
                 <TableRow className="bg-muted/50">
                   <TableHead>Nome</TableHead>
                   <TableHead>Marca</TableHead>
+                  <TableHead>Tipo</TableHead>
+                  <TableHead>Câmbio</TableHead>
                   <TableHead>Ano</TableHead>
                   <TableHead>Preço</TableHead>
                   <TableHead>Status</TableHead>
@@ -219,10 +215,11 @@ export default function Cars() {
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
+
               <TableBody>
                 {filteredCars.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
+                    <TableCell colSpan={10} className="text-center text-muted-foreground py-8">
                       Nenhum carro encontrado
                     </TableCell>
                   </TableRow>
@@ -231,11 +228,13 @@ export default function Cars() {
                     <TableRow key={car.id} className="hover:bg-muted/30 transition-smooth">
                       <TableCell className="font-medium">{car.nome}</TableCell>
                       <TableCell>{car.marca}</TableCell>
+                      <TableCell className="capitalize">{car.tipo || "-"}</TableCell>
+                      <TableCell className="capitalize">{car.cambio || "-"}</TableCell>
                       <TableCell>{car.ano}</TableCell>
                       <TableCell>
-                        {new Intl.NumberFormat('pt-BR', {
-                          style: 'currency',
-                          currency: 'BRL'
+                        {new Intl.NumberFormat("pt-BR", {
+                          style: "currency",
+                          currency: "BRL",
                         }).format(car.preco)}
                       </TableCell>
                       <TableCell>
@@ -245,13 +244,10 @@ export default function Cars() {
                       <TableCell className="text-center">{car.atendimentos}</TableCell>
                       <TableCell>
                         <div className="flex items-center justify-end gap-2">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => navigate(`/carros/editar/${car.id}`)}
-                          >
+                          <Button size="sm" variant="ghost" onClick={() => navigate(`/carros/editar/${car.id}`)}>
                             <Edit className="w-4 h-4" />
                           </Button>
+
                           {car.status !== "vendido" && (
                             <Button
                               size="sm"
@@ -262,6 +258,7 @@ export default function Cars() {
                               <CheckCircle className="w-4 h-4" />
                             </Button>
                           )}
+
                           <Button
                             size="sm"
                             variant="ghost"
@@ -288,9 +285,7 @@ export default function Cars() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
-            <AlertDialogDescription>
-              Tem certeza que deseja excluir este carro? Esta ação não pode ser desfeita.
-            </AlertDialogDescription>
+            <AlertDialogDescription>Tem certeza que deseja excluir este carro? Esta ação não pode ser desfeita.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>

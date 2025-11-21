@@ -12,6 +12,7 @@ interface Lead {
   email: string | null;
   observacoes: string | null;
   resumo: string | null;
+  status_financiamento: string | null; // 👈 ADICIONADO AQUI
   created_at: string;
 }
 
@@ -29,7 +30,7 @@ export default function LeadDetailsPage() {
   const fetchLead = async () => {
     const { data, error } = await supabase
       .from("leads")
-      .select("*")
+      .select("*") // 👈 já traz o status_financiamento
       .eq("id", id)
       .single();
 
@@ -58,6 +59,20 @@ export default function LeadDetailsPage() {
       </div>
     );
   }
+
+  const statusColor =
+    lead.status_financiamento === "aprovado"
+      ? "text-green-400"
+      : lead.status_financiamento === "reprovado"
+      ? "text-red-400"
+      : "text-yellow-400";
+
+  const statusLabel =
+    lead.status_financiamento === "aprovado"
+      ? "Aprovado"
+      : lead.status_financiamento === "reprovado"
+      ? "Reprovado"
+      : "Pendente";
 
   return (
     <div className="min-h-screen bg-background px-6 py-10 max-w-4xl mx-auto space-y-8">
@@ -92,6 +107,13 @@ export default function LeadDetailsPage() {
           <div>
             <p className="text-sm text-muted-foreground">Email</p>
             <p className="font-medium">{lead.email || "-"}</p>
+          </div>
+
+          <div>
+            <p className="text-sm text-muted-foreground">Status do Financiamento</p>
+            <p className={`font-medium ${statusColor}`}>
+              {statusLabel}
+            </p>
           </div>
 
           <div>
