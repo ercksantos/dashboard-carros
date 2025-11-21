@@ -1,73 +1,138 @@
-# Welcome to your Lovable project
+# Concessionária Inteligente 🚗🤖
 
-## Project info
+Um sistema completo para gestão de leads, atendimento inteligente e
+organização operacional para concessionárias.\
+Desenvolvido com foco em simplicidade, eficiência e automação --- ideal
+para equipes que precisam de velocidade sem complicação.
 
-**URL**: https://lovable.dev/projects/6263d25d-6af7-4cf1-b2cb-25c6f7b93e84
+------------------------------------------------------------------------
 
-## How can I edit this code?
+## 📌 Visão Geral
 
-There are several ways of editing your application.
+A **Concessionária Inteligente** permite acompanhar cada lead, organizar
+etapas de atendimento e visualizar informações detalhadas de forma
+clara.\
+Tudo isso com uma interface prática, responsiva e pensada para uso real
+no dia a dia.
 
-**Use Lovable**
+------------------------------------------------------------------------
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/6263d25d-6af7-4cf1-b2cb-25c6f7b93e84) and start prompting.
+## ✨ Funcionalidades
 
-Changes made via Lovable will be committed automatically to this repo.
+### 🔹 Dashboard Geral
 
-**Use your preferred IDE**
+-   Visualização rápida dos leads por status\
+-   Cards com contadores automáticos\
+-   Atualização dinâmica dos dados
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### 🔹 Listagem de Leads
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+-   Tabela organizada com filtros claros\
+-   Visualização imediata do estado de cada lead\
+-   Acesso direto aos detalhes
 
-Follow these steps:
+### 🔹 Página /leads/:id
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+-   Exibe todos os dados do lead\
+-   Permite alterar status rapidamente\
+-   Atualizações refletidas em todo o sistema
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+### 🔹 Responsividade
 
-# Step 3: Install the necessary dependencies.
-npm i
+100% funcional em: - Desktop\
+- Tablet\
+- Celular
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+A interface se reorganiza automaticamente para manter clareza e
+usabilidade.
+
+------------------------------------------------------------------------
+
+## 🛠️ Tecnologias Utilizadas
+
+-   **Lovable.dev** -- Estruturação do projeto\
+-   **Supabase** -- Banco de dados (CRUD completo)\
+-   **React + Vite** -- Front-end\
+-   **ShadCN/UI** -- Componentes visuais\
+-   **TypeScript** -- Tipagem estática\
+-   **TailwindCSS** -- Estilização veloz\
+-   **Zustand** -- Gerenciamento de estado\
+-   **Node.js** -- Ambiente de desenvolvimento
+
+------------------------------------------------------------------------
+
+## 🚀 Como Rodar o Projeto
+
+``` bash
+npm install
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+O sistema iniciará normalmente na porta padrão do Vite.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+------------------------------------------------------------------------
 
-**Use GitHub Codespaces**
+## 📦 Como Fazer o Deploy
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+Você pode publicar em:
 
-## What technologies are used for this project?
+### 🔸 Vercel (recomendado)
 
-This project is built with:
+-   Importa o repositório do GitHub\
+-   Build detectado automaticamente\
+-   Deploy em segundos
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### 🔸 Netlify
 
-## How can I deploy this project?
+-   Excelente performance\
+-   Deploy automático via Git
 
-Simply open [Lovable](https://lovable.dev/projects/6263d25d-6af7-4cf1-b2cb-25c6f7b93e84) and click on Share -> Publish.
+### 🔸 GitHub Pages
 
-## Can I connect a custom domain to my Lovable project?
+-   Apenas front-end\
+-   Requer adaptação do Vite para caminhos relativos
 
-Yes, you can!
+------------------------------------------------------------------------
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## 👨‍💻 Estrutura Geral
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+    src/
+     ├─ components/
+     ├─ pages/
+     ├─ hooks/
+     ├─ services/
+     ├─ store/
+     └─ utils/
+
+------------------------------------------------------------------------
+
+## 🧩 Como Distribuir ou Vender o Sistema
+
+Você pode transformar o projeto em:
+
+### 🔹 SaaS
+
+Hospedando o front no Vercel + Supabase como backend.
+
+### 🔹 Sistema instalável para clientes
+
+-   Empacotar com **Electron**\
+-   Criar instaladores para Windows/macOS/Linux
+
+### 🔹 White Label
+
+-   Criar variações personalizadas por cliente\
+-   Reaproveitando 100% da base principal
+
+------------------------------------------------------------------------
+
+## 📄 Licença
+
+Projeto fechado para uso comercial do autor.
+
+------------------------------------------------------------------------
+
+## 💬 Contato
+
+Criado por **Erick**.\
+Para sugestões e melhorias: **erickpsantos0@gmail.com**
