@@ -44,7 +44,7 @@ export default function LeadsPage() {
   const updateStatus = async (id: number, status: string) => {
     await supabase
       .from("leads")
-      .update({ 
+      .update({
         status_financiamento: status,
         financiamento_enviado: false,
       })
@@ -57,6 +57,7 @@ export default function LeadsPage() {
     const nameMatch = lead.nome?.toLowerCase().includes(searchName.toLowerCase());
     const carMatch = lead.carro_interesse?.toLowerCase().includes(searchCar.toLowerCase());
     const phoneMatch = lead.telefone?.toLowerCase().includes(searchPhone.toLowerCase());
+
     return nameMatch && carMatch && phoneMatch;
   });
 
@@ -105,14 +106,23 @@ export default function LeadsPage() {
           </div>
 
           <div className="space-y-4">
-            {filteredLeads.length === 0 && <p className="text-muted-foreground">Nenhum lead encontrado.</p>}
+            {filteredLeads.length === 0 && (
+              <p className="text-muted-foreground">Nenhum lead encontrado.</p>
+            )}
 
             {filteredLeads.map((lead) => (
-              <div key={lead.id} className="flex items-center justify-between bg-muted p-4 rounded-lg">
-                <div>
+              <div
+                key={lead.id}
+                className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-muted p-4 rounded-lg"
+              >
+                <div className="flex-1">
                   <p className="font-medium">{lead.nome || "Sem nome"}</p>
-                  <p className="text-sm text-muted-foreground">Interesse: {lead.carro_interesse || "Nenhum"}</p>
-                  <p className="text-sm text-muted-foreground">Telefone: {lead.telefone || "-"}</p>
+                  <p className="text-sm text-muted-foreground">
+                    Interesse: {lead.carro_interesse || "Nenhum"}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Telefone: {lead.telefone || "-"}
+                  </p>
 
                   <p className="mt-2 text-sm">
                     Status: {renderStatusBadge(lead.status_financiamento)}
@@ -123,11 +133,11 @@ export default function LeadsPage() {
                   </p>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
                   <Button
                     variant="outline"
                     onClick={() => updateStatus(lead.id, "aprovado")}
-                    className="border border-emerald-500 text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 transition"
+                    className="border border-emerald-500 text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 transition w-full md:w-auto"
                   >
                     Aprovado
                   </Button>
@@ -135,12 +145,15 @@ export default function LeadsPage() {
                   <Button
                     variant="outline"
                     onClick={() => updateStatus(lead.id, "reprovado")}
-                    className="border border-red-500 text-red-400 bg-red-500/5 hover:bg-red-500/20 transition"
+                    className="border border-red-500 text-red-400 bg-red-500/5 hover:bg-red-500/20 transition w-full md:w-auto"
                   >
                     Reprovado
                   </Button>
 
-                  <Button onClick={() => navigate(`/leads/${lead.id}`)}>
+                  <Button
+                    onClick={() => navigate(`/leads/${lead.id}`)}
+                    className="w-full md:w-auto"
+                  >
                     Ver Detalhes
                   </Button>
                 </div>

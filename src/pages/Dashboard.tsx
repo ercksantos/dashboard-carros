@@ -25,17 +25,12 @@ export default function Dashboard() {
   const [chartData, setChartData] = useState<CarData[]>([]);
 
   useEffect(() => {
-    // Verificar autenticação
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) {
-        navigate("/auth");
-      }
+      if (!session) navigate("/auth");
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (!session) {
-        navigate("/auth");
-      }
+      if (!session) navigate("/auth");
     });
 
     loadDashboardData();
@@ -45,7 +40,6 @@ export default function Dashboard() {
 
   const loadDashboardData = async () => {
     try {
-      // Total de carros disponíveis
       const { count: availableCount } = await supabase
         .from("carros")
         .select("*", { count: "exact", head: true })
@@ -53,7 +47,6 @@ export default function Dashboard() {
 
       setTotalCars(availableCount || 0);
 
-      // Total de atendimentos dos últimos 30 dias
       const { count: atendimentosCount } = await supabase
         .from("leads")
         .select("*", { count: "exact", head: true })
@@ -61,8 +54,6 @@ export default function Dashboard() {
 
       setTotalAtendimentos(atendimentosCount || 0);
 
-
-      // Carro mais procurado
       const { data: topCarData } = await supabase
         .from("carros")
         .select("nome, visitas")
@@ -74,7 +65,6 @@ export default function Dashboard() {
         setTopCar(topCarData.nome);
       }
 
-      // Dados para o gráfico - Top 5 carros mais visitados
       const { data: topCarsData } = await supabase
         .from("carros")
         .select("nome, visitas")
@@ -96,7 +86,13 @@ export default function Dashboard() {
     }
   };
 
-  const COLORS = ['hsl(195 100% 50%)', 'hsl(180 100% 60%)', 'hsl(195 80% 55%)', 'hsl(180 80% 65%)', 'hsl(195 60% 60%)'];
+  const COLORS = [
+    'hsl(195 100% 50%)',
+    'hsl(180 100% 60%)',
+    'hsl(195 80% 55%)',
+    'hsl(180 80% 65%)',
+    'hsl(195 60% 60%)'
+  ];
 
   if (loading) {
     return (
@@ -109,35 +105,37 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      
+
       <main className="container mx-auto px-4 py-8 space-y-8">
-        {/* Header Section */}
-        <div className="flex items-center justify-between">
+
+        {/* Header Section (AGORA RESPONSIVO) */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
-            <p className="text-muted-foreground mt-1">Visão geral do estoque e atendimentos</p>
+            <p className="text-muted-foreground mt-1">
+              Visão geral do estoque e atendimentos
+            </p>
           </div>
 
-          <div className="flex items-center gap-3">
-            <Button 
-              onClick={() => navigate("/carros")} 
-              className="gradient-primary glow-primary"
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+            <Button
+              onClick={() => navigate("/carros")}
+              className="gradient-primary glow-primary w-full sm:w-auto"
             >
               <Plus className="w-4 h-4 mr-2" />
               Gerenciar Carros
             </Button>
 
-            <Button 
-              onClick={() => navigate("/leads")} 
-              variant="secondary" 
-              className="border border-primary/30"
+            <Button
+              onClick={() => navigate("/leads")}
+              variant="secondary"
+              className="border border-primary/30 w-full sm:w-auto"
             >
               <UserCheck className="w-4 h-4 mr-2" />
               Ver Leads
             </Button>
           </div>
         </div>
-
 
         {/* Metrics Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -169,17 +167,17 @@ export default function Dashboard() {
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis 
-                  dataKey="nome" 
+                <XAxis
+                  dataKey="nome"
                   stroke="hsl(var(--muted-foreground))"
                   tick={{ fill: 'hsl(var(--muted-foreground))' }}
                 />
-                <YAxis 
+                <YAxis
                   stroke="hsl(var(--muted-foreground))"
                   tick={{ fill: 'hsl(var(--muted-foreground))' }}
                 />
-                <Tooltip 
-                  contentStyle={{ 
+                <Tooltip
+                  contentStyle={{
                     background: 'rgba(30, 41, 59, 0.9)',
                     backdropFilter: 'blur(8px)',
                     border: '1px solid rgba(148, 163, 184, 0.2)',
