@@ -125,7 +125,7 @@ export default function LeadsPage() {
                   </p>
 
                   <p className="mt-2 text-sm">
-                    Status: {renderStatusBadge(lead.status_financiamento)}
+                    Financiamento: {renderStatusBadge(lead.status_financiamento)}
                   </p>
 
                   <p className="text-xs text-muted-foreground mt-1">
