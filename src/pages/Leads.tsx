@@ -44,7 +44,10 @@ export default function LeadsPage() {
   const updateStatus = async (id: number, status: string) => {
     await supabase
       .from("leads")
-      .update({ status_financiamento: status })
+      .update({ 
+        status_financiamento: status,
+        financiamento_enviado: false,
+      })
       .eq("id", id);
 
     fetchLeads(); // atualiza instantâneo
