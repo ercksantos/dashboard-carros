@@ -9,7 +9,11 @@ import Leads from "./pages/Leads";
 import LeadDetailsPage from "@/pages/LeadDetails";
 import Cars from "./pages/Cars";
 import CarForm from "./pages/CarForm";
+import Agendamentos from "./pages/Agendamentos";
+import Configuracoes from "./pages/Configuracoes";
+import Relatorios from "./pages/Relatorios";
 import NotFound from "./pages/NotFound";
+import { AppLayout } from "./components/layout/AppLayout";
 
 const queryClient = new QueryClient();
 
@@ -22,13 +26,42 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/auth" element={<Auth />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/leads" element={<Leads />} />
-          <Route path="/leads/:id" element={<LeadDetailsPage />} />
-          <Route path="/carros" element={<Cars />} />
-          <Route path="/carros/novo" element={<CarForm />} />
-          <Route path="/carros/editar/:id" element={<CarForm />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route
+            path="/dashboard"
+            element={<AppLayout><Dashboard /></AppLayout>}
+          />
+          <Route
+            path="/leads"
+            element={<AppLayout><Leads /></AppLayout>}
+          />
+          <Route
+            path="/leads/:id"
+            element={<AppLayout><LeadDetailsPage /></AppLayout>}
+          />
+          <Route
+            path="/carros"
+            element={<AppLayout><Cars /></AppLayout>}
+          />
+          <Route
+            path="/carros/novo"
+            element={<AppLayout><CarForm /></AppLayout>}
+          />
+          <Route
+            path="/carros/editar/:id"
+            element={<AppLayout><CarForm /></AppLayout>}
+          />
+          <Route
+            path="/agendamentos"
+            element={<AppLayout><Agendamentos /></AppLayout>}
+          />
+          <Route
+            path="/configuracoes"
+            element={<AppLayout><Configuracoes /></AppLayout>}
+          />
+          <Route
+            path="/relatorios"
+            element={<AppLayout><Relatorios /></AppLayout>}
+          />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
@@ -36,4 +69,4 @@ const App = () => (
   </QueryClientProvider>
 );
 
-export default App; 
+export default App;

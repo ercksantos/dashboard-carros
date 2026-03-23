@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Save } from "lucide-react";
+import { ArrowLeft, Save, X, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { ImageUpload } from "@/components/cars/ImageUpload";
@@ -21,6 +22,11 @@ const carSchema = z.object({
   ano: z.number().min(1900).max(new Date().getFullYear() + 1),
   preco: z.number().positive("Preço deve ser positivo"),
   status: z.enum(["disponível", "vendido", "revisão"]),
+  km: z.number().nonnegative().nullable().optional(),
+  combustivel: z.string().optional(),
+  cor: z.string().max(40).optional(),
+  descricao: z.string().optional(),
+  destaque: z.boolean().optional(),
 });
 
 export default function CarForm() {
@@ -38,6 +44,14 @@ export default function CarForm() {
   const [status, setStatus] = useState("disponível");
   const [fotos, setFotos] = useState<string[]>([]);
   const [fotosInternas, setFotosInternas] = useState<string[]>([]);
+  // New fields
+  const [km, setKm] = useState("");
+  const [cor, setCor] = useState("");
+  const [combustivel, setCombustivel] = useState("");
+  const [descricao, setDescricao] = useState("");
+  const [destaque, setDestaque] = useState(false);
+  const [opcionais, setOpcionais] = useState<string[]>([]);
+  const [opcionalInput, setOpcionalInput] = useState("");
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -65,16 +79,20 @@ export default function CarForm() {
 
       setNome(data.nome);
       setMarca(data.marca);
-
-      // 🔥 Correção: carregar tipo e câmbio
       setTipo(data.tipo || "");
       setCambio(data.cambio || "");
-
       setAno(data.ano?.toString() || "");
       setPreco(data.preco?.toString() || "");
       setStatus(data.status);
       setFotos(Array.isArray(data.fotos) ? (data.fotos as string[]) : []);
       setFotosInternas(Array.isArray(data.fotos_internas) ? (data.fotos_internas as string[]) : []);
+      // New fields
+      setKm(data.km?.toString() ?? "");
+      setCor(data.cor ?? "");
+      setCombustivel(data.combustivel ?? "");
+      setDescricao(data.descricao ?? "");
+      setDestaque(data.destaque ?? false);
+      setOpcionais(Array.isArray(data.opcionais) ? (data.opcionais as string[]) : []);
     } catch (error) {
       toast.error("Erro ao carregar carro");
       navigate("/carros");
@@ -94,6 +112,12 @@ export default function CarForm() {
       status,
       fotos,
       fotos_internas: fotosInternas,
+      km: km ? parseInt(km) : null,
+      cor: cor.trim() || null,
+      combustivel: combustivel || null,
+      descricao: descricao.trim() || null,
+      destaque,
+      opcionais: opcionais.length > 0 ? opcionais : null,
     };
 
     try {
@@ -168,8 +192,7 @@ export default function CarForm() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
-      
+
       <main className="container mx-auto px-4 py-8 max-w-2xl">
         <Button
           variant="ghost"
@@ -186,7 +209,7 @@ export default function CarForm() {
           </h1>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            
+
             {/* Nome */}
             <div className="space-y-2">
               <Label htmlFor="nome">Nome do Carro</Label>
@@ -293,13 +316,135 @@ export default function CarForm() {
               </Select>
             </div>
 
+            {/* KM + Cor */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="km">Quilometragem (km)</Label>
+                <Input
+                  id="km"
+                  type="number"
+                  value={km}
+                  onChange={(e) => setKm(e.target.value)}
+                  placeholder="Ex: 15000"
+                  disabled={loading}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="cor">Cor</Label>
+                <Input
+                  id="cor"
+                  value={cor}
+                  onChange={(e) => setCor(e.target.value)}
+                  placeholder="Ex: Prata"
+                  disabled={loading}
+                />
+              </div>
+            </div>
+
+            {/* Combustível */}
+            <div className="space-y-2">
+              <Label htmlFor="combustivel">Combustível</Label>
+              <Select value={combustivel} onValueChange={setCombustivel} disabled={loading}>
+                <SelectTrigger id="combustivel">
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="flex">Flex</SelectItem>
+                  <SelectItem value="gasolina">Gasolina</SelectItem>
+                  <SelectItem value="diesel">Diesel</SelectItem>
+                  <SelectItem value="eletrico">Elétrico</SelectItem>
+                  <SelectItem value="hibrido">Híbrido</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Descrição */}
+            <div className="space-y-2">
+              <Label htmlFor="descricao">Descrição</Label>
+              <Textarea
+                id="descricao"
+                value={descricao}
+                onChange={(e) => setDescricao(e.target.value)}
+                placeholder="Descreva os diferenciais do veículo..."
+                rows={3}
+                disabled={loading}
+              />
+            </div>
+
+            {/* Opcionais (tags input) */}
+            <div className="space-y-2">
+              <Label>Opcionais</Label>
+              <div className="flex gap-2">
+                <Input
+                  value={opcionalInput}
+                  onChange={(e) => setOpcionalInput(e.target.value)}
+                  placeholder="Ex: Ar-condicionado"
+                  disabled={loading}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      const v = opcionalInput.trim();
+                      if (v && !opcionais.includes(v)) {
+                        setOpcionais(prev => [...prev, v]);
+                      }
+                      setOpcionalInput("");
+                    }
+                  }}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  disabled={loading}
+                  onClick={() => {
+                    const v = opcionalInput.trim();
+                    if (v && !opcionais.includes(v)) {
+                      setOpcionais(prev => [...prev, v]);
+                    }
+                    setOpcionalInput("");
+                  }}
+                >
+                  <Plus className="w-4 h-4" />
+                </Button>
+              </div>
+              {opcionais.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {opcionais.map((op) => (
+                    <span
+                      key={op}
+                      className="flex items-center gap-1 text-xs px-2 py-1 rounded-full"
+                      style={{ background: 'rgba(26,122,255,0.15)', color: '#1a7aff', border: '0.5px solid rgba(26,122,255,0.3)' }}
+                    >
+                      {op}
+                      <button type="button" onClick={() => setOpcionais(prev => prev.filter(o => o !== op))}>
+                        <X className="w-3 h-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Destaque */}
+            <div className="flex items-center gap-3">
+              <Switch
+                id="destaque"
+                checked={destaque}
+                onCheckedChange={setDestaque}
+                disabled={loading}
+              />
+              <Label htmlFor="destaque" className="cursor-pointer">
+                Destacar este veículo
+              </Label>
+            </div>
+
             {/* Fotos */}
             <Tabs defaultValue="externas" className="w-full">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="externas">Fotos Externas</TabsTrigger>
                 <TabsTrigger value="internas">Fotos Internas</TabsTrigger>
               </TabsList>
-              
+
               <TabsContent value="externas" className="mt-4">
                 <ImageUpload
                   label="Fotos Externas do Veículo"
@@ -308,7 +453,7 @@ export default function CarForm() {
                   maxImages={10}
                 />
               </TabsContent>
-              
+
               <TabsContent value="internas" className="mt-4">
                 <ImageUpload
                   label="Fotos Internas do Veículo"

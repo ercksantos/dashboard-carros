@@ -1,14 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Header } from "@/components/layout/Header";
 import { StatusBadge } from "@/components/cars/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card } from "@/components/ui/card";
-import { Plus, Edit, Trash2, CheckCircle, Search } from "lucide-react";
+import { Plus, Edit, Trash2, CheckCircle, Search, Star } from "lucide-react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -33,6 +32,9 @@ interface Car {
   visitas: number;
   atendimentos: number;
   atualizado_em: string;
+  km: number | null;
+  cor: string | null;
+  destaque: boolean | null;
 }
 
 export default function Cars() {
@@ -124,13 +126,22 @@ export default function Cars() {
   const handleMarkAsSold = async (id: number) => {
     try {
       const { error } = await supabase.from("carros").update({ status: "vendido" }).eq("id", id);
-
       if (error) throw error;
-
       toast.success("Carro marcado como vendido");
       loadCars();
     } catch {
       toast.error("Erro ao atualizar status");
+    }
+  };
+
+  const handleToggleDestaque = async (car: Car) => {
+    try {
+      const { error } = await supabase.from("carros").update({ destaque: !car.destaque }).eq("id", car.id);
+      if (error) throw error;
+      toast.success(car.destaque ? "Removido dos destaques" : "Adicionado aos destaques");
+      loadCars();
+    } catch {
+      toast.error("Erro ao atualizar destaque");
     }
   };
 
@@ -146,7 +157,6 @@ export default function Cars() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
 
       <main className="container mx-auto px-4 py-8 space-y-6">
         <div className="flex items-center justify-between">
@@ -208,6 +218,8 @@ export default function Cars() {
                   <TableHead>Tipo</TableHead>
                   <TableHead>Câmbio</TableHead>
                   <TableHead>Ano</TableHead>
+                  <TableHead>KM</TableHead>
+                  <TableHead>Cor</TableHead>
                   <TableHead>Preço</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-center">Visitas</TableHead>
@@ -226,11 +238,20 @@ export default function Cars() {
                 ) : (
                   filteredCars.map((car) => (
                     <TableRow key={car.id} className="hover:bg-muted/30 transition-smooth">
-                      <TableCell className="font-medium">{car.nome}</TableCell>
+                      <TableCell className="font-medium">
+                        <span className="flex items-center gap-1">
+                          {car.nome}
+                          {car.destaque && (
+                            <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                          )}
+                        </span>
+                      </TableCell>
                       <TableCell>{car.marca}</TableCell>
                       <TableCell className="capitalize">{car.tipo || "-"}</TableCell>
                       <TableCell className="capitalize">{car.cambio || "-"}</TableCell>
                       <TableCell>{car.ano}</TableCell>
+                      <TableCell>{car.km != null ? car.km.toLocaleString('pt-BR') + ' km' : '-'}</TableCell>
+                      <TableCell>{car.cor ?? '-'}</TableCell>
                       <TableCell>
                         {new Intl.NumberFormat("pt-BR", {
                           style: "currency",
@@ -244,6 +265,15 @@ export default function Cars() {
                       <TableCell className="text-center">{car.atendimentos}</TableCell>
                       <TableCell>
                         <div className="flex items-center justify-end gap-2">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleToggleDestaque(car)}
+                            title={car.destaque ? 'Remover destaque' : 'Destacar'}
+                            className={car.destaque ? 'text-yellow-400' : 'text-muted-foreground'}
+                          >
+                            <Star className={`w-4 h-4 ${car.destaque ? 'fill-yellow-400' : ''}`} />
+                          </Button>
                           <Button size="sm" variant="ghost" onClick={() => navigate(`/carros/editar/${car.id}`)}>
                             <Edit className="w-4 h-4" />
                           </Button>
